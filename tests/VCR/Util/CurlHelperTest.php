@@ -255,7 +255,8 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedBody, file_get_contents($testFile));
     }
 
-    public function testPropagateRequestHeadersPropagates() {
+    public function testPropagateRequestHeadersPropagates()
+    {
         $requestHeaders = array(
             'X-Test' => '1234'
         );
@@ -276,7 +277,8 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    public function testPropagateRequestHeadersDoesNothingWhenHeaderOutNotSet() {
+    public function testPropagateRequestHeadersDoesNothingWhenHeaderOutNotSet()
+    {
         $requestHeaders = array(
             'X-Test' => '1234'
         );

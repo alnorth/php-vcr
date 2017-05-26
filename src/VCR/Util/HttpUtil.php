@@ -146,10 +146,10 @@ class HttpUtil
 
         $urlParts = parse_url($request->getUrl());
         $path = (!empty($urlParts['path']) ? $urlParts['path'] : '/')
-              . (!empty($urlParts['query']) ? '?'.$urlParts['query'] : '');
+              . (!empty($urlParts['query']) ? '?' . $urlParts['query'] : '');
 
         $requestHeaders = $request->getHeaders();
-        if(isset($requestHeaders['Host'])) {
+        if (isset($requestHeaders['Host'])) {
             unset($requestHeaders['Host']);
         }
 
@@ -157,7 +157,7 @@ class HttpUtil
             array(
                 "{$request->getMethod()} {$path} HTTP/1.1",
                 "Host: {$urlParts['host']}",
-                "Accept: */*"
+                'Accept: */*'
             ),
             self::formatHeadersForCurl($requestHeaders)
         );

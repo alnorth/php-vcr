@@ -146,7 +146,8 @@ class HttpUtilTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider requestDescriptionProvider
      */
-    public function testFormatAsRequestDescriptionWithHeaders($method, $url, $expected) {
+    public function testFormatAsRequestDescriptionWithHeaders($method, $url, $expected)
+    {
         $headers = array(
             'X-Test' => '1234'
         );
@@ -156,7 +157,8 @@ class HttpUtilTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    public function requestDescriptionProvider() {
+    public function requestDescriptionProvider()
+    {
         return array(
             array(
                 'GET',

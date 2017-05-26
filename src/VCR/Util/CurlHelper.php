@@ -113,7 +113,7 @@ class CurlHelper
                 break;
             case CURLINFO_HEADER_OUT:
                 $info = $response->getCurlInfo($option);
-                if(is_null($info)) {
+                if (is_null($info)) {
                     $info = false;
                 }
                 break;
@@ -202,7 +202,7 @@ class CurlHelper
      */
     public static function propagateRequestHeaders(Request $request, Response $response)
     {
-        if($request->getCurlOption(CURLINFO_HEADER_OUT)) {
+        if ($request->getCurlOption(CURLINFO_HEADER_OUT)) {
             $response->setCurlInfo(
                 CURLINFO_HEADER_OUT,
                 HttpUtil::formatAsRequestDescriptionWithHeaders($request)
