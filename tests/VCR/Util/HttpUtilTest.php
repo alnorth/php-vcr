@@ -2,6 +2,8 @@
 
 namespace VCR\Util;
 
+use VCR\Request;
+
 class HttpUtilTest extends \PHPUnit_Framework_TestCase
 {
     public function testParseResponseBasic()
@@ -139,5 +141,40 @@ class HttpUtilTest extends \PHPUnit_Framework_TestCase
         );
         $outputArray = HttpUtil::parseHeaders($inputArray);
         $this->assertEquals($excpetedHeaders, $outputArray);
+    }
+
+    /**
+     * @dataProvider requestDescriptionProvider
+     */
+    public function testFormatAsRequestDescriptionWithHeaders($method, $url, $expected)
+    {
+        $headers = array(
+            'X-Test' => '1234'
+        );
+        $input = new Request($method, $url, $headers);
+
+        $output = HttpUtil::formatAsRequestDescriptionWithHeaders($input);
+        $this->assertEquals($expected, $output);
+    }
+
+    public function requestDescriptionProvider()
+    {
+        return array(
+            array(
+                'GET',
+                'http://example.com/test?12=34',
+                "GET /test?12=34 HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\nX-Test: 1234\r\n\r\n"
+            ),
+            array(
+                'GET',
+                'http://example.com/',
+                "GET / HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\nX-Test: 1234\r\n\r\n"
+            ),
+            array(
+                'GET',
+                'http://example.com',
+                "GET / HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\nX-Test: 1234\r\n\r\n"
+            ),
+        );
     }
 }

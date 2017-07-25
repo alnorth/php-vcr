@@ -111,6 +111,12 @@ class CurlHelper
             case CURLINFO_HEADER_SIZE:
                 $info =  mb_strlen(HttpUtil::formatAsStatusWithHeadersString($response), 'ISO-8859-1');
                 break;
+            case CURLINFO_HEADER_OUT:
+                $info = $response->getCurlInfo($option);
+                if (is_null($info)) {
+                    $info = false;
+                }
+                break;
             default:
                 $info = $response->getCurlInfo($option);
                 break;
@@ -185,6 +191,24 @@ class CurlHelper
             default:
                 $request->setCurlOption($option, $value);
                 break;
+        }
+    }
+
+    /**
+     * When CURLINFO_HEADER_OUT is set the Response needs to know about the
+     * Request headers. Normally these two objects don't know about each other,
+     * so we need to pass the data on.
+     *
+     * @param Request  $request  Request take the headers from.
+     * @param Response $response Response to set the curl info on.
+     */
+    public static function propagateRequestHeaders(Request $request, Response $response)
+    {
+        if ($request->getCurlOption(CURLINFO_HEADER_OUT)) {
+            $response->setCurlInfo(
+                CURLINFO_HEADER_OUT,
+                HttpUtil::formatAsRequestDescriptionWithHeaders($request)
+            );
         }
     }
     

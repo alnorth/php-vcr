@@ -267,6 +267,49 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedBody, file_get_contents($testFile));
     }
 
+    public function testPropagateRequestHeadersPropagates()
+    {
+        $requestHeaders = array(
+            'X-Test' => '1234'
+        );
+        $request = new Request('GET', 'http://example.com', $requestHeaders);
+        $request->setCurlOption(CURLINFO_HEADER_OUT, true);
+
+        $status = array(
+            'code' => 200,
+            'message' => 'OK',
+            'http_version' => '1.1'
+        );
+        $response = new Response($status, array(), 'example response');
+
+        CurlHelper::propagateRequestHeaders($request, $response);
+
+        $expected = "GET / HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\nX-Test: 1234\r\n\r\n";
+        $output = CurlHelper::getCurlOptionFromResponse($response, CURLINFO_HEADER_OUT);
+        $this->assertEquals($expected, $output);
+    }
+
+    public function testPropagateRequestHeadersDoesNothingWhenHeaderOutNotSet()
+    {
+        $requestHeaders = array(
+            'X-Test' => '1234'
+        );
+        $request = new Request('GET', 'http://example.com', $requestHeaders);
+
+        $status = array(
+            'code' => 200,
+            'message' => 'OK',
+            'http_version' => '1.1'
+        );
+        $response = new Response($status, array(), 'example response');
+
+        CurlHelper::propagateRequestHeaders($request, $response);
+
+        $expected = false;
+        $output = CurlHelper::getCurlOptionFromResponse($response, CURLINFO_HEADER_OUT);
+        $this->assertSame($expected, $output);
+    }
+
     /**
      * @dataProvider getCurlOptionProvider()
      *

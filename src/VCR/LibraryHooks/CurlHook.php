@@ -200,10 +200,13 @@ class CurlHook implements LibraryHook
         CurlHelper::validateCurlPOSTBody($request, $curlHandle);
 
         $requestCallback = self::$requestCallback;
-        self::$responses[(int) $curlHandle] = $requestCallback($request);
+        $response = $requestCallback($request);
+        CurlHelper::propagateRequestHeaders($request, $response);
+
+        self::$responses[(int) $curlHandle] = $response;
 
         return CurlHelper::handleOutput(
-            self::$responses[(int) $curlHandle],
+            $response,
             self::$curlOptions[(int) $curlHandle],
             $curlHandle
         );

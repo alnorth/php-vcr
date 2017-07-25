@@ -229,6 +229,25 @@ class CurlHookTest extends \PHPUnit_Framework_TestCase
         $this->curlHook->disable();
     }
 
+    public function testShouldReturnRequestHeadersUsingHeaderOut()
+    {
+        //$this->curlHook->enable($this->getTestCallback());
+
+        $curlHandle = curl_init('http://example.com/test');
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandle, CURLINFO_HEADER_OUT, true);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array(
+            'X-Test: 1234'
+        ));
+        curl_exec($curlHandle);
+        $actual = curl_getinfo($curlHandle, CURLINFO_HEADER_OUT);
+        curl_close($curlHandle);
+
+        $this->curlHook->disable();
+        $expected = "GET /test HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\nX-Test: 1234\r\n\r\n";
+        $this->assertEquals($expected, $actual, 'Request headers were not returned.');
+    }
+
     public function testShouldNotThrowErrorWhenDisabledTwice()
     {
         $this->curlHook->disable();

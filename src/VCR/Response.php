@@ -123,6 +123,15 @@ class Response
     }
 
     /**
+     * @param $key
+     * @param $value
+     */
+    public function setCurlInfo($key, $value)
+    {
+        $this->curlInfo[$key] = $value;
+    }
+
+    /**
      * @return array
      */
     public function getHeaders()

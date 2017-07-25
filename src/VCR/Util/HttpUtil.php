@@ -2,6 +2,7 @@
 
 namespace VCR\Util;
 
+use VCR\Request;
 use VCR\Response;
 
 class HttpUtil
@@ -127,6 +128,39 @@ class HttpUtil
     {
         $headers = self::formatHeadersForCurl($response->getHeaders());
         array_unshift($headers, self::formatAsStatusString($response));
+        return join("\r\n", $headers) . "\r\n\r\n";
+    }
+
+    /**
+     * Returns a HTTP request line with headers from specified request.
+     *
+     * @param Request $request
+     * @return string HTTP status line.
+     */
+    public static function formatAsRequestDescriptionWithHeaders(Request $request)
+    {
+        // This is a best effort method and will not reflect real curl output in many
+        // situations. For example we don't record the HTTP version used for requests.
+        // It also doesn't include the headers you'd get in a POST request with a body.
+        // However, it is hopefully close enough to fool code that relies on CURLINFO_HEADER_OUT.
+
+        $urlParts = parse_url($request->getUrl());
+        $path = (!empty($urlParts['path']) ? $urlParts['path'] : '/')
+              . (!empty($urlParts['query']) ? '?' . $urlParts['query'] : '');
+
+        $requestHeaders = $request->getHeaders();
+        if (isset($requestHeaders['Host'])) {
+            unset($requestHeaders['Host']);
+        }
+
+        $headers = array_merge(
+            array(
+                "{$request->getMethod()} {$path} HTTP/1.1",
+                "Host: {$urlParts['host']}",
+                'Accept: */*'
+            ),
+            self::formatHeadersForCurl($requestHeaders)
+        );
         return join("\r\n", $headers) . "\r\n\r\n";
     }
 }
