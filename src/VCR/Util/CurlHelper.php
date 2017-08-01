@@ -56,7 +56,9 @@ class CurlHelper
     public static function handleOutput(Response $response, array $curlOptions, $ch)
     {
         // If there is a header function set, feed the http status and headers to it.
-        if (isset($curlOptions[CURLOPT_HEADERFUNCTION])) {
+        if (isset($curlOptions[CURLOPT_HEADERFUNCTION])
+            && is_callable($curlOptions[CURLOPT_HEADERFUNCTION])
+        ) {
             $headerList = array(HttpUtil::formatAsStatusString($response));
             $headerList += HttpUtil::formatHeadersForCurl($response->getHeaders());
             $headerList[] = '';
@@ -71,7 +73,9 @@ class CurlHelper
             $body = HttpUtil::formatAsStatusWithHeadersString($response) . $body;
         }
 
-        if (isset($curlOptions[CURLOPT_WRITEFUNCTION])) {
+        if (isset($curlOptions[CURLOPT_WRITEFUNCTION])
+            && is_callable($curlOptions[CURLOPT_WRITEFUNCTION])
+        ) {
             call_user_func($curlOptions[CURLOPT_WRITEFUNCTION], $ch, $body);
         } elseif (isset($curlOptions[CURLOPT_RETURNTRANSFER]) && $curlOptions[CURLOPT_RETURNTRANSFER] == true) {
             return $body;
@@ -196,7 +200,7 @@ class CurlHelper
     public static function validateCurlPOSTBody(Request $request, $curlHandle = null)
     {
         $readFunction = $request->getCurlOption(CURLOPT_READFUNCTION);
-        if (is_null($readFunction)) {
+        if (is_null($readFunction) || !is_callable($readFunction)) {
             return;
         }
         
