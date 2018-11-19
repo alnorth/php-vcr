@@ -259,6 +259,81 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actualHeaders);
     }
 
+    public function testHandleOutputHeaderFunctionWithPublicFunction()
+    {
+        $this->headersFound = array();
+        $curlOptions = array(
+            CURLOPT_HEADERFUNCTION => array($this, 'publicCurlHeaderFunction'),
+        );
+        $status = array(
+            'code' => 200,
+            'message' => 'OK',
+            'http_version' => '1.1',
+        );
+        $headers = array(
+            'Content-Length' => 0,
+        );
+        $response = new Response($status, $headers, 'example response');
+        CurlHelper::handleOutput($response, $curlOptions, curl_init());
+
+        $expected = array(
+            'HTTP/1.1 200 OK',
+            'Content-Length: 0',
+            ''
+        );
+        $this->assertEquals($expected, $this->headersFound);
+    }
+
+    public function testHandleOutputHeaderFunctionWithProtectedFunction()
+    {
+        $this->headersFound = array();
+        $curlOptions = array(
+            CURLOPT_HEADERFUNCTION => array($this, 'protectedCurlHeaderFunction'),
+        );
+        $status = array(
+            'code' => 200,
+            'message' => 'OK',
+            'http_version' => '1.1',
+        );
+        $headers = array(
+            'Content-Length' => 0,
+        );
+        $response = new Response($status, $headers, 'example response');
+        CurlHelper::handleOutput($response, $curlOptions, curl_init());
+
+        $expected = array(
+            'HTTP/1.1 200 OK',
+            'Content-Length: 0',
+            ''
+        );
+        $this->assertEquals($expected, $this->headersFound);
+    }
+
+    public function testHandleOutputHeaderFunctionWithPrivateFunction()
+    {
+        $this->headersFound = array();
+        $curlOptions = array(
+            CURLOPT_HEADERFUNCTION => array($this, 'privateCurlHeaderFunction'),
+        );
+        $status = array(
+            'code' => 200,
+            'message' => 'OK',
+            'http_version' => '1.1',
+        );
+        $headers = array(
+            'Content-Length' => 0,
+        );
+        $response = new Response($status, $headers, 'example response');
+        CurlHelper::handleOutput($response, $curlOptions, curl_init());
+
+        $expected = array(
+            'HTTP/1.1 200 OK',
+            'Content-Length: 0',
+            ''
+        );
+        $this->assertEquals($expected, $this->headersFound);
+    }
+
     public function testHandleResponseUsesWriteFunction()
     {
         $test = $this;
@@ -271,6 +346,19 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
 
                 return strlen($body);
             }
+        );
+        $response = new Response(200, array(), $expectedBody);
+
+        CurlHelper::handleOutput($response, $curlOptions, $expectedCh);
+    }
+
+    public function testHandleResponseUsesWriteFunctionWithPrivateFunction()
+    {
+        $test = $this;
+        $expectedCh = curl_init();
+        $expectedBody = 'example response';
+        $curlOptions = array(
+            CURLOPT_WRITEFUNCTION => array($this, 'privateCurlWriteFunction')
         );
         $response = new Response(200, array(), $expectedBody);
 
@@ -492,5 +580,32 @@ class CurlHelperTest extends \PHPUnit_Framework_TestCase
         CurlHelper::setCurlOptionOnRequest($request, CURLOPT_POSTFIELDS, array('some' => 'test'));
 
         $this->assertEquals('DELETE', $request->getMethod());
+    }
+
+    // Function used for testing CURLOPT_HEADERFUNCTION
+    public function publicCurlHeaderFunction($ch, $header)
+    {
+        $this->headersFound[] = $header;
+    }
+
+    // Function used for testing CURLOPT_HEADERFUNCTION
+    protected function protectedCurlHeaderFunction($ch, $header)
+    {
+        $this->headersFound[] = $header;
+    }
+
+    // Function used for testing CURLOPT_HEADERFUNCTION
+    private function privateCurlHeaderFunction($ch, $header)
+    {
+        $this->headersFound[] = $header;
+    }
+
+    // Function used for testing CURLOPT_WRITEFUNCTION
+    private function privateCurlWriteFunction($ch, $body)
+    {
+        $this->assertEquals('resource', gettype($ch));
+        $this->assertEquals('example response', $body);
+
+        return strlen($body);
     }
 }
